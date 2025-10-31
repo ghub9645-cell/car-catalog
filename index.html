@@ -42,6 +42,59 @@
             opacity: 0.8;
         }
         
+        .search-container {
+            background: white;
+            padding: 25px;
+            margin: 30px 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        #searchInput {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e94560;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        #searchInput:focus {
+            border-color: #16213e;
+            box-shadow: 0 0 10px rgba(22, 33, 62, 0.2);
+        }
+        
+        .search-btn {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: #16213e;
+            transform: translateY(-2px);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.1rem;
+            display: none;
+        }
+        
         .catalog {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -134,6 +187,14 @@
             h1 {
                 font-size: 2rem;
             }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            #searchInput {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -146,9 +207,23 @@
     </header>
     
     <div class="container">
-        <div class="catalog">
+        <!-- Поиск -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Поиск по марке или модели (например: Toyota, BMW, Charger...)">
+                <button class="search-btn" onclick="searchCars()">Найти</button>
+            </div>
+        </div>
+
+        <!-- Сообщение если нет результатов -->
+        <div class="no-results" id="noResults">
+            Машин по вашему запросу не найдено. Попробуйте другой поисковый запрос.
+        </div>
+
+        <!-- Каталог -->
+        <div class="catalog" id="carCatalog">
             <!-- Toyota Chaser -->
-            <div class="car-card">
+            <div class="car-card" data-search="toyota chaser япония седан">
                 <img src="images/toyota-chaser.jpg" alt="TOYOTA CHASER" class="car-image">
                 <div class="car-info">
                     <h2 class="car-title">TOYOTA CHASER</h2>
@@ -172,7 +247,7 @@
             </div>
             
             <!-- Chevrolet Corvette -->
-            <div class="car-card">
+            <div class="car-card" data-search="chevrolet corvette америка спортивный">
                 <img src="images/chevrolet-corvette.jpg" alt="CHEVROLET CORVETTE" class="car-image">
                 <div class="car-info">
                     <h2 class="car-title">CHEVROLET CORVETTE</h2>
@@ -196,7 +271,7 @@
             </div>
             
             <!-- Dodge Charger -->
-            <div class="car-card">
+            <div class="car-card" data-search="dodge charger америка седан">
                 <img src="images/dodge-charger.jpg" alt="DODGE CHARGER" class="car-image">
                 <div class="car-info">
                     <h2 class="car-title">DODGE CHARGER</h2>
@@ -220,7 +295,7 @@
             </div>
             
             <!-- BMW M5 G80 -->
-            <div class="car-card">
+            <div class="car-card" data-search="bmw m5 германия седан">
                 <img src="images/bmw-m5.jpg" alt="BMW M5 G80" class="car-image">
                 <div class="car-info">
                     <h2 class="car-title">BMW M5 G80</h2>
@@ -244,7 +319,7 @@
             </div>
 
             <!-- Audi RS7 -->
-            <div class="car-card">
+            <div class="car-card" data-search="audi rs7 германия fastback">
                 <img src="images/audi-rs7.jpg" alt="AUDI RS7" class="car-image">
                 <div class="car-info">
                     <h2 class="car-title">AUDI RS7</h2>
@@ -268,7 +343,7 @@
             </div>
 
             <!-- Dodge Challenger -->
-            <div class="car-card">
+            <div class="car-card" data-search="dodge challenger америка маслкар">
                 <img src="images/dodge-challenger.jpg" alt="DODGE CHALLENGER" class="car-image">
                 <div class="car-info">
                     <h2 class="car-title">DODGE CHALLENGER</h2>
@@ -295,8 +370,56 @@
     
     <footer>
         <div class="container">
-            <p>© 2023 Каталог автомобилей. Все права защищены.</p>
+            <p>© 2025 Каталог автомобилей. Все права защищены.</p>
         </div>
     </footer>
+
+    <script>
+        function searchCars() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const carCards = document.querySelectorAll('.car-card');
+            const noResults = document.getElementById('noResults');
+            let foundCount = 0;
+
+            carCards.forEach(card => {
+                const searchData = card.getAttribute('data-search').toLowerCase();
+                if (searchData.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    foundCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Показываем сообщение если ничего не найдено
+            if (foundCount === 0 && searchTerm !== '') {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+
+            // Если поле поиска пустое - показываем все карточки
+            if (searchTerm === '') {
+                carCards.forEach(card => {
+                    card.style.display = 'block';
+                });
+                noResults.style.display = 'none';
+            }
+        }
+
+        // Поиск при нажатии Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchCars();
+            }
+        });
+
+        // Автопоиск при вводе (опционально)
+        document.getElementById('searchInput').addEventListener('input', function() {
+            if (this.value.length >= 2 || this.value.length === 0) {
+                searchCars();
+            }
+        });
+    </script>
 </body>
 </html>
